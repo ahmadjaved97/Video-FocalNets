@@ -42,33 +42,31 @@ def build_model(config):
         print(f"Creating model: {model_type}")
         model = create_model(
             model_type,
-            # num_classes=config.model.num_classes,
-            # num_frames=config.data.num_frames,
-            # backbone=config.uniformerv2.backbone,
-            # dropout_rate=config.uniformerv2.dropout_rate
-            use_checkpoint = config.MODEL.USE_CHECKPOINT,
-            checkpoint_num = config.MODEL.CHECKPOINT_NUM,
-            num_classes = config.MODEL.NUM_CLASSES,
-            t_size = config.DATA.NUM_FRAMES,
+            pretrained=is_pretrained,
+            use_checkpoint=config.MODEL.USE_CHECKPOINT,
+            checkpoint_num=config.MODEL.CHECKPOINT_NUM,
+            num_classes=config.MODEL.NUM_CLASSES,
+            t_size=config.DATA.NUM_FRAMES,
+            
+            backbone=config.UNIFORMERV2.BACKBONE,
+            n_layers=config.UNIFORMERV2.N_LAYERS,
+            n_dim=config.UNIFORMERV2.N_DIM,
+            n_head=config.UNIFORMERV2.N_HEAD,
+            mlp_factor=config.UNIFORMERV2.MLP_FACTOR,
+            backbone_drop_path_rate=config.UNIFORMERV2.BACKBONE_DROP_PATH_RATE,
+            drop_path_rate=config.UNIFORMERV2.DROP_PATH_RATE,
+            mlp_dropout=config.UNIFORMERV2.MLP_DROPOUT,
+            cls_dropout=config.UNIFORMERV2.CLS_DROPOUT,
+            return_list=config.UNIFORMERV2.RETURN_LIST,
 
-            backbone = config.UNIFORMERV2.BACKBONE,
-            n_layers = config.UNIFORMERV2.N_LAYERS,
-            n_dim = config.UNIFORMERV2.N_DIM,
-            n_head = config.UNIFORMERV2.N_HEAD,
-            mlp_factor = config.UNIFORMERV2.MLP_FACTOR,
-            backbone_drop_path_rate = config.UNIFORMERV2.BACKBONE_DROP_PATH_RATE,
-            drop_path_rate = config.UNIFORMERV2.DROP_PATH_RATE,
-            mlp_dropout = config.UNIFORMERV2.MLP_DROPOUT,
-            cls_dropout = config.UNIFORMERV2.CLS_DROPOUT,
-            return_list = config.UNIFORMERV2.RETURN_LIST,
+            temporal_downsample=config.UNIFORMERV2.TEMPORAL_DOWNSAMPLE,
+            dw_reduction=config.UNIFORMERV2.DW_REDUCTION,
+            no_lmhra=config.UNIFORMERV2.NO_LMHRA,
+            double_lmhra=config.UNIFORMERV2.DOUBLE_LMHRA,
 
-            temporal_downsample = config.UNIFORMERV2.TEMPORAL_DOWNSAMPLE,
-            dw_reduction = config.UNIFORMERV2.DW_REDUCTION,
-            no_lmhra = config.UNIFORMERV2.NO_LMHRA,
-            double_lmhra = config.UNIFORMERV2.DOUBLE_LMHRA,
-
-            frozen = config.UNIFORMERV2.FROZEN,
-            # any additional UniFormerV2-specific parameters here
+            frozen=config.UNIFORMERV2.FROZEN,
+            delete_special_head=config.UNIFORMERV2.DELETE_SPECIAL_HEAD,
+            pretrain=config.UNIFORMERV2.PRETRAIN,
         )
     else:
         model = create_model(
