@@ -13,65 +13,91 @@ logger = logging.get_logger(__name__)
 
 
 class Uniformerv2(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self,
+        use_checkpoint=False,
+        checkpoint_num=[0],
+        t_size=16, 
+        dw_reduction=1.5,
+        backbone_drop_path_rate=0., 
+        temporal_downsample=True,
+        no_lmhra=False, double_lmhra=True,
+        return_list=[8, 9, 10, 11], 
+        n_layers=4, 
+        n_dim=768, 
+        n_head=12, 
+        mlp_factor=4.0, 
+        drop_path_rate=0.,
+        mlp_dropout=[0.5, 0.5, 0.5, 0.5], 
+        cls_dropout=0.5, 
+        num_classes=400,
+        frozen=False,
+
+        delete_special_head=False,
+        pretrain='',
+
+
+    ):
         super().__init__()
 
-        self.cfg = cfg
+        # self.cfg = cfg
 
-        use_checkpoint = cfg.MODEL.USE_CHECKPOINT
-        checkpoint_num = cfg.MODEL.CHECKPOINT_NUM
-        num_classes = cfg.MODEL.NUM_CLASSES 
-        t_size = cfg.DATA.NUM_FRAMES
+        self.use_checkpoint = use_checkpoint
+        self.checkpoint_num = checkpoint_num
+        self.num_classes = num_classes
+        self.t_size = t_size
 
-        backbone = cfg.UNIFORMERV2.BACKBONE
-        n_layers = cfg.UNIFORMERV2.N_LAYERS
-        n_dim = cfg.UNIFORMERV2.N_DIM
-        n_head = cfg.UNIFORMERV2.N_HEAD
-        mlp_factor = cfg.UNIFORMERV2.MLP_FACTOR
-        backbone_drop_path_rate = cfg.UNIFORMERV2.BACKBONE_DROP_PATH_RATE
-        drop_path_rate = cfg.UNIFORMERV2.DROP_PATH_RATE
-        mlp_dropout = cfg.UNIFORMERV2.MLP_DROPOUT
-        cls_dropout = cfg.UNIFORMERV2.CLS_DROPOUT
-        return_list = cfg.UNIFORMERV2.RETURN_LIST
+        self.backbone = backbone
+        self.n_layers = n_layers
+        self.n_dim = n_dim
+        self.n_head = n_head
+        self.mlp_factor = mlp_factor
+        self.backbone_drop_path_rate = backbone_drop_path_rate
+        self.drop_path_rate = drop_path_rate
+        self.mlp_dropout = mlp_dropout
+        self.cls_dropout = cls_dropout
+        self.return_list = return_list
 
-        temporal_downsample = cfg.UNIFORMERV2.TEMPORAL_DOWNSAMPLE
-        dw_reduction = cfg.UNIFORMERV2.DW_REDUCTION
-        no_lmhra = cfg.UNIFORMERV2.NO_LMHRA
-        double_lmhra = cfg.UNIFORMERV2.DOUBLE_LMHRA
+        self.temporal_downsample = temporal_downsample
+        self.dw_reduction = dw_reduction
+        self.no_lmhra = no_lmhra
+        self.double_lmhra = double_lmhra
 
-        frozen = cfg.UNIFORMERV2.FROZEN
+        self.frozen = frozen
+
+        self.delete_special_head = delete_special_head
+        self.pretrain = pretrain
 
         # pre-trained from CLIP
         self.backbone = model.__dict__[backbone](
-            use_checkpoint=use_checkpoint,
-            checkpoint_num=checkpoint_num,
-            t_size=t_size,
-            dw_reduction=dw_reduction,
-            backbone_drop_path_rate=backbone_drop_path_rate, 
-            temporal_downsample=temporal_downsample,
-            no_lmhra=no_lmhra,
-            double_lmhra=double_lmhra,
-            return_list=return_list, 
-            n_layers=n_layers, 
-            n_dim=n_dim, 
-            n_head=n_head, 
-            mlp_factor=mlp_factor, 
-            drop_path_rate=drop_path_rate, 
-            mlp_dropout=mlp_dropout, 
-            cls_dropout=cls_dropout, 
-            num_classes=num_classes,
-            frozen=frozen,
+            use_checkpoint=self.use_checkpoint,
+            checkpoint_num=self.checkpoint_num,
+            t_size=self.t_size,
+            dw_reduction=self.dw_reduction,
+            backbone_drop_path_rate=self.backbone_drop_path_rate, 
+            temporal_downsample=self.temporal_downsample,
+            no_lmhra=self.no_lmhra,
+            double_lmhra=self.double_lmhra,
+            return_list=self.return_list, 
+            n_layers=self.n_layers, 
+            n_dim=self.n_dim, 
+            n_head=self.n_head, 
+            mlp_factor=self.mlp_factor, 
+            drop_path_rate=self.drop_path_rate, 
+            mlp_dropout=self.mlp_dropout, 
+            cls_dropout=self.cls_dropout, 
+            num_classes=self.num_classes,
+            frozen=self.frozen,
         )
 
-        if cfg.UNIFORMERV2.PRETRAIN != '':
+        if self.pretrain != '':
             # Load Kineti-700 pretrained model
-            logger.info(f'load model from {cfg.UNIFORMERV2.PRETRAIN}')
-            state_dict = torch.load(cfg.UNIFORMERV2.PRETRAIN, map_location='cpu')
-            if cfg.UNIFORMERV2.DELETE_SPECIAL_HEAD and state_dict['backbone.transformer.proj.2.weight'].shape[0] != num_classes:
+            logger.info(f'load model from {self.pretrain}')
+            state_dict = torch.load(self.pretrain, map_location='cpu')
+            if self.delete_special_head and state_dict['backbone.transformer.proj.2.weight'].shape[0] != num_classes:
                 logger.info('Delete FC')
                 del state_dict['backbone.transformer.proj.2.weight']
                 del state_dict['backbone.transformer.proj.2.bias']
-            elif not cfg.UNIFORMERV2.DELETE_SPECIAL_HEAD:
+            elif not self.delete_special_head:
                 logger.info('Load FC')
                 if num_classes == 400 or state_dict['backbone.transformer.proj.2.weight'].shape[0] == num_classes:
                     state_dict['backbone.transformer.proj.2.weight'] = state_dict['backbone.transformer.proj.2.weight'][:num_classes]
@@ -120,9 +146,35 @@ def uniformerv2_b16(
     mlp_dropout=[0.5, 0.5, 0.5, 0.5], 
     cls_dropout=0.5, num_classes=400,
     frozen=False,
+    delete_special_head=False,
+    pretrain='',
 ):
     model = Uniformerv2(
-        
+        use_checkpoint=use_checkpoint,
+        checkpoint_num=checkpoint_num,
+        t_size=t_size,
+        dw_reduction=dw_reduction,
+        backbone_drop_path_rate=backbone_drop_path_rate,
+        temporal_downsample=temporal_downsample,
+        no_lmhra=no_lmhra,
+        double_lmhra=double_lmhra,
+        return_list=return_list,
+        n_layers=n_layers,
+        n_dim=n_dim,
+        n_head=n_head,
+        mlp_factor=mlp_factor,
+        drop_path_rate=drop_path_rate,
+        mlp_dropout=mlp_dropout,
+        cls_dropout=cls_dropout,
+        num_classes=num_classes,
+        frozen=frozen,
+        delete_special_head=delete_special_head,
+        pretrain=pretrain,
     )
+
+    if pretrained and pretrain:
+        logger.info(f"Loading pretrained weights from {pretrain}")
+        state_dict = torch.load(pretrain, map_location="cpu")
+        model.load_state_dict(state_dict, strict=False)
     
-    pass
+    return model
