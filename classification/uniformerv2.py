@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 import json
+import numpy as np
 import torch
 import torch.nn as nn
 from timm.models.registry import register_model
 
 import uniformerv2_model as model
-from .build import MODEL_REGISTRY
+# from .build import MODEL_REGISTRY
 
 import slowfast.utils.logging as logging
 
@@ -14,6 +15,7 @@ logger = logging.get_logger(__name__)
 
 class Uniformerv2(nn.Module):
     def __init__(self,
+        backbone=None,
         use_checkpoint=False,
         checkpoint_num=[0],
         t_size=16, 
@@ -136,7 +138,8 @@ class Uniformerv2(nn.Module):
         return output
 
 @register_model
-def uniformerv2_b16(
+def uniformerv2(
+    backbone='uniformerv2_b16',
     pretrained=True, use_checkpoint=False, checkpoint_num=[0],
     t_size=16, dw_reduction=1.5, backbone_drop_path_rate=0., 
     temporal_downsample=True,
@@ -150,6 +153,7 @@ def uniformerv2_b16(
     pretrain='',
 ):
     model = Uniformerv2(
+        backbone=backbone,
         use_checkpoint=use_checkpoint,
         checkpoint_num=checkpoint_num,
         t_size=t_size,
@@ -178,3 +182,25 @@ def uniformerv2_b16(
         model.load_state_dict(state_dict, strict=False)
     
     return model
+
+
+if __name__ == '__main__':
+    seed = 4217
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    num_frames = 8
+
+    model = uniformerv2(
+        pretrained=False, 
+        t_size=num_frames, backbone_drop_path_rate=0.2, drop_path_rate=0.4,
+        dw_reduction=1.5,
+        no_lmhra=True,
+        temporal_downsample=False,
+        backbone='uniformerv2_b16'
+    )
+
+
+    print("Model Loaded")
+    print(model)
