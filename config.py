@@ -46,6 +46,102 @@ _C.DATA.PIN_MEMORY = True
 # Number of data loading threads
 _C.DATA.NUM_WORKERS = 8
 
+##-------------------------------------------------------
+#UniformerV2 data settings
+#---------------------------------------------------------
+
+# The separator used between path and label.
+_C.DATA.PATH_LABEL_SEPARATOR = " "
+
+# Video path prefix if any.
+_C.DATA.PATH_PREFIX = ""
+
+# The list of video path prefix if any.
+_C.DATA.PATH_PREFIX_LIST = [""]
+
+# Label file path template.
+_C.DATA.LABEL_PATH_TEMPLATE = "somesomev1_rgb_{}_split.txt"
+
+# Label file path template.
+_C.DATA.IMAGE_TEMPLATE = "{:05d}.jpg"
+
+# The video sampling rate of the input clip.
+_C.DATA.SAMPLING_RATE = 8
+
+# Eigenvalues for PCA jittering. Note PCA is RGB based.
+_C.DATA.TRAIN_PCA_EIGVAL = [0.225, 0.224, 0.229]
+
+# Eigenvectors for PCA jittering.
+_C.DATA.TRAIN_PCA_EIGVEC = [
+    [-0.5675, 0.7192, 0.4009],
+    [-0.5808, -0.0045, -0.8140],
+    [-0.5836, -0.6948, 0.4203],
+]
+
+# If a imdb have been dumpped to a local file with the following format:
+# `{"im_path": im_path, "class": cont_id}`
+# then we can skip the construction of imdb and load it from the local file.
+_C.DATA.PATH_TO_PRELOAD_IMDB = ""
+
+# The mean value of the video raw pixels across the R G B channels.
+_C.DATA.MEAN = [0.45, 0.45, 0.45]
+# List of input frame channel dimensions.
+
+_C.DATA.INPUT_CHANNEL_NUM = [3, 3]
+
+# The std value of the video raw pixels across the R G B channels.
+_C.DATA.STD = [0.225, 0.225, 0.225]
+
+# The spatial augmentation jitter scales for training.
+_C.DATA.TRAIN_JITTER_SCALES = [256, 320]
+
+# The relative scale range of Inception-style area based random resizing augmentation.
+# If this is provided, DATA.TRAIN_JITTER_SCALES above is ignored.
+_C.DATA.TRAIN_JITTER_SCALES_RELATIVE = []
+
+# The relative aspect ratio range of Inception-style area based random resizing
+# augmentation.
+_C.DATA.TRAIN_JITTER_ASPECT_RELATIVE = []
+
+# If True, perform stride length uniform temporal sampling.
+_C.DATA.USE_OFFSET_SAMPLING = False
+
+# Whether to apply motion shift for augmentation.
+_C.DATA.TRAIN_JITTER_MOTION_SHIFT = False
+
+# The spatial crop size for training.
+_C.DATA.TRAIN_CROP_SIZE = 224
+
+# The spatial crop size for testing.
+_C.DATA.TEST_CROP_SIZE = 256
+
+# Input videos may has different fps, convert it to the target video fps before
+# frame sampling.
+_C.DATA.TARGET_FPS = 30
+
+# Decoding backend, options include `pyav` or `torchvision`
+_C.DATA.DECODING_BACKEND = "pyav"
+
+# if True, sample uniformly in [1 / max_scale, 1 / min_scale] and take a
+# reciprocal to get the scale. If False, take a uniform sample from
+# [min_scale, max_scale].
+_C.DATA.INV_UNIFORM_SAMPLE = False
+
+# If True, perform random horizontal flip on the video frames during training.
+_C.DATA.RANDOM_FLIP = True
+
+# If True, calculdate the map as metric.
+_C.DATA.MULTI_LABEL = False
+
+# Method to perform the ensemble, options include "sum" and "max".
+_C.DATA.ENSEMBLE_METHOD = "sum"
+
+# If True, revert the default input channel (RBG <-> BGR).
+_C.DATA.REVERSE_INPUT_CHANNEL = False
+
+# Whether read from mc.
+_C.DATA.MC = False
+
 # -----------------------------------------------------------------------------
 # Model settings
 # -----------------------------------------------------------------------------
@@ -202,6 +298,136 @@ _C.THROUGHPUT_MODE = False
 _C.DEBUG_MODE = False
 # local rank for DistributedDataParallel, given by command line argument
 _C.LOCAL_RANK = 0
+
+# -----------------------------------------------------------------------------
+# UNIFORMERV2 options
+# -----------------------------------------------------------------------------
+
+_C.UNIFORMERV2 = CN()
+# backbone for UniFormerV2, vit_b32, vit_b16, bit_l14
+_C.UNIFORMERV2.BACKBONE = 'vit_b16'
+
+# feature layers
+_C.UNIFORMERV2.N_LAYERS = 4
+
+# feature dimension
+_C.UNIFORMERV2.N_DIM = 768
+
+# head number
+_C.UNIFORMERV2.N_HEAD = 12
+
+# MLP ratio
+_C.UNIFORMERV2.MLP_FACTOR = 4.0
+
+# backbone droppath rate
+_C.UNIFORMERV2.BACKBONE_DROP_PATH_RATE = 0.0
+
+# droppath rate
+_C.UNIFORMERV2.DROP_PATH_RATE = 0.0
+
+# MLP dropout
+_C.UNIFORMERV2.MLP_DROPOUT = [0.5, 0.5, 0.5, 0.5]
+
+# CLS layer dropout
+_C.UNIFORMERV2.CLS_DROPOUT = 0.5
+
+# index list of return features
+_C.UNIFORMERV2.RETURN_LIST = [8, 9, 10, 11]
+
+# local block reduction
+_C.UNIFORMERV2.DW_REDUCTION = 1.5
+
+# whether add temporal downsample
+_C.UNIFORMERV2.TEMPORAL_DOWNSAMPLE = True
+
+# whether use local MHRA
+_C.UNIFORMERV2.NO_LMHRA = False
+
+# local block number
+_C.UNIFORMERV2.DOUBLE_LMHRA = True
+
+# pretrained model for UniFormerV2
+_C.UNIFORMERV2.PRETRAIN = ''
+
+# delete pretrained head
+_C.UNIFORMERV2.DELETE_SPECIAL_HEAD = False
+
+# freeze backbone
+_C.UNIFORMERV2.FROZEN = False
+
+# ---------------------------------------------------------------------------- #
+# Optimizer options
+# ---------------------------------------------------------------------------- #
+_C.SOLVER = CfgNode()
+
+# Base learning rate.
+_C.SOLVER.BASE_LR = 0.1
+
+# Learning rate policy (see utils/lr_policy.py for options and examples).
+_C.SOLVER.LR_POLICY = "cosine"
+
+# Final learning rates for 'cosine' policy.
+_C.SOLVER.COSINE_END_LR = 0.0
+
+# Exponential decay factor.
+_C.SOLVER.GAMMA = 0.1
+
+# Step size for 'exp' and 'cos' policies (in epochs).
+_C.SOLVER.STEP_SIZE = 1
+
+# Steps for 'steps_' policies (in epochs).
+_C.SOLVER.STEPS = []
+
+# Learning rates for 'steps_' policies.
+_C.SOLVER.LRS = []
+
+# Maximal number of epochs.
+_C.SOLVER.MAX_EPOCH = 300
+
+# Momentum.
+_C.SOLVER.MOMENTUM = 0.9
+
+# Momentum dampening.
+_C.SOLVER.DAMPENING = 0.0
+
+# Nesterov momentum.
+_C.SOLVER.NESTEROV = True
+
+# L2 regularization.
+_C.SOLVER.WEIGHT_DECAY = 1e-4
+
+# Start the warm up from SOLVER.BASE_LR * SOLVER.WARMUP_FACTOR.
+_C.SOLVER.WARMUP_FACTOR = 0.1
+
+# Gradually warm up the SOLVER.BASE_LR over this number of epochs.
+_C.SOLVER.WARMUP_EPOCHS = 0.0
+
+# The start learning rate of the warm up.
+_C.SOLVER.WARMUP_START_LR = 0.01
+
+# Optimization method.
+_C.SOLVER.OPTIMIZING_METHOD = "sgd"
+
+# Base learning rate is linearly scaled with NUM_SHARDS.
+_C.SOLVER.BASE_LR_SCALE_NUM_SHARDS = False
+
+# If True, start from the peak cosine learning rate after warm up.
+_C.SOLVER.COSINE_AFTER_WARMUP = False
+
+# If True, perform no weight decay on parameter with one dimension (bias term, etc).
+_C.SOLVER.ZERO_WD_1D_PARAM = False
+
+# gradient norm clipping.
+_C.SOLVER.CLIP_GRADIENT = 20
+
+# backbone lr ratio.
+_C.SOLVER.BACKBONE_LR_RATIO = 0.1
+
+# special parameter list.
+_C.SOLVER.SPECIAL_LIST = []
+
+# special parameter list.
+_C.SOLVER.SPECIAL_RATIO = 1.
 
 
 def _update_config_from_file(config, cfg_file):
