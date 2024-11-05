@@ -296,7 +296,7 @@ def build_dataloader(logger, config):
     train_loader = DataLoader(
         train_data, sampler=sampler_train,
         batch_size=config.DATA.BATCH_SIZE,
-        num_workers=16,
+        num_workers=config.DATA.NUM_WORKERS,
         pin_memory=True,
         drop_last=True,
         collate_fn=partial(mmcv_collate, samples_per_gpu=config.DATA.BATCH_SIZE),
@@ -324,8 +324,8 @@ def build_dataloader(logger, config):
     sampler_val = SubsetRandomSampler(indices)
     val_loader = DataLoader(
         val_data, sampler=sampler_val,
-        batch_size=2,
-        num_workers=16,
+        batch_size=config.DATA.TEST_BATCH_SIZE,
+        num_workers=config.DATA.NUM_WORKERS,
         pin_memory=True,
         drop_last=True,
         collate_fn=partial(mmcv_collate, samples_per_gpu=2),

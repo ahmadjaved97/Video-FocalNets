@@ -38,7 +38,7 @@ def build_model(config):
             num_classes=config.MODEL.NUM_CLASSES
         )
     
-    elif model_type == "uniformerv2_b16":
+    elif model_type == "uniformerv2":
         print(f"Creating model: {model_type}")
         model = create_model(
             model_type,
