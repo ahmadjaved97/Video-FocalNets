@@ -43,7 +43,7 @@ def build_model(config):
         model = create_model(
             model_type,
             pretrained=is_pretrained,
-            use_checkpoint=config.MODEL.USE_CHECKPOINT,
+            use_checkpoint=config.TRAIN.USE_CHECKPOINT,
             checkpoint_num=config.MODEL.CHECKPOINT_NUM,
             num_classes=config.MODEL.NUM_CLASSES,
             t_size=config.DATA.NUM_FRAMES,
@@ -66,7 +66,7 @@ def build_model(config):
 
             frozen=config.UNIFORMERV2.FROZEN,
             delete_special_head=config.UNIFORMERV2.DELETE_SPECIAL_HEAD,
-            pretrain=config.UNIFORMERV2.PRETRAIN,
+            pretrain=config.UNIFORMERV2.PRETRAINED_PATH,
         )
     else:
         model = create_model(

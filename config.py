@@ -27,6 +27,8 @@ _C.DATA.NUM_FRAMES = 32
 _C.DATA.NUM_CLASSES = 101
 _C.DATA.LABEL_LIST = 'labels/ucf_101_labels.csv'
 _C.DATA.BATCH_SIZE = 128
+_C.DATA.TEST_BATCH_SIZE = 128
+
 # Path to dataset, could be overwritten by command line argument
 _C.DATA.DATA_PATH = ''
 # Dataset name
@@ -347,7 +349,7 @@ _C.UNIFORMERV2.NO_LMHRA = False
 _C.UNIFORMERV2.DOUBLE_LMHRA = True
 
 # pretrained model for UniFormerV2
-_C.UNIFORMERV2.PRETRAIN = ''
+_C.UNIFORMERV2.PRETRAINED_PATH = ''
 
 # delete pretrained head
 _C.UNIFORMERV2.DELETE_SPECIAL_HEAD = False
@@ -358,7 +360,7 @@ _C.UNIFORMERV2.FROZEN = False
 # ---------------------------------------------------------------------------- #
 # Optimizer options
 # ---------------------------------------------------------------------------- #
-_C.SOLVER = CfgNode()
+_C.SOLVER = CN()
 
 # Base learning rate.
 _C.SOLVER.BASE_LR = 0.1

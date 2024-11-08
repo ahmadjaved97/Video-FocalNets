@@ -10,9 +10,16 @@ import torch.nn.functional as F
 import torch.utils.checkpoint as checkpoint
 
 
-import slowfast.utils.logging as logging
+import logging
 
-logger = logging.get_logger(__name__)
+# Configure the logger
+logging.basicConfig(
+    level=logging.INFO,  # Set level (e.g., DEBUG, INFO, WARNING)
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+# logger = logging.get_logger(__name__)
+
 
 
 MODEL_PATH = '/home/s63ajave_hpc/UniFormerV2/extract_clip/model_weights'
