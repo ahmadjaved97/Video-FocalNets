@@ -58,7 +58,7 @@ class Local_MHRA(nn.Module):
         )
 
         # init zero
-        logger.info('Init zero for Conv in pos_emb')
+        logging.info('Init zero for Conv in pos_emb')
         nn.init.constant_(self.pos_embed[3].weight, 0)
         nn.init.constant_(self.pos_embed[3].bias, 0)
 
@@ -75,12 +75,12 @@ class ResidualAttentionBlock(nn.Module):
         
         self.n_head = n_head
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
-        logger.info(f'Drop path rate: {drop_path}')
+        logging.info(f'Drop path rate: {drop_path}')
 
         self.no_lmhra = no_lmhra
         self.double_lmhra = double_lmhra
-        logger.info(f'No L_MHRA: {no_lmhra}')
-        logger.info(f'Double L_MHRA: {double_lmhra}')
+        logging.info(f'No L_MHRA: {no_lmhra}')
+        logging.info(f'Double L_MHRA: {double_lmhra}')
         if not no_lmhra:
             self.lmhra1 = Local_MHRA(d_model, dw_reduction=dw_reduction)
             if double_lmhra:
@@ -143,7 +143,7 @@ class Extractor(nn.Module):
         super().__init__()
 
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
-        logger.info(f'Drop path rate: {drop_path}')
+        logging.info(f'Drop path rate: {drop_path}')
         self.attn = nn.MultiheadAttention(d_model, n_head)
         self.ln_1 = nn.LayerNorm(d_model)
         d_mlp = round(mlp_factor * d_model)
@@ -217,8 +217,8 @@ class Transformer(nn.Module):
         # checkpoint
         self.use_checkpoint = use_checkpoint
         self.checkpoint_num = checkpoint_num
-        logger.info(f'Use checkpoint: {self.use_checkpoint}')
-        logger.info(f'Checkpoint number: {self.checkpoint_num}')
+        logging.info(f'Use checkpoint: {self.use_checkpoint}')
+        logging.info(f'Checkpoint number: {self.checkpoint_num}')
 
         # global block
         assert n_layers == len(return_list)
@@ -338,7 +338,7 @@ class VisionTransformer(nn.Module):
 
 
 def inflate_weight(weight_2d, time_dim, center=True):
-    logger.info(f'Init center: {center}')
+    logging.info(f'Init center: {center}')
     if center:
         weight_3d = torch.zeros(*weight_2d.shape)
         weight_3d = weight_3d.unsqueeze(2).repeat(1, 1, time_dim, 1, 1)
@@ -355,9 +355,9 @@ def load_state_dict(model, state_dict):
     for k in state_dict.keys():
         if state_dict[k].shape != state_dict_3d[k].shape:
             if len(state_dict_3d[k].shape) <= 2:
-                logger.info(f'Ignore: {k}')
+                logging.info(f'Ignore: {k}')
                 continue
-            logger.info(f'Inflate: {k}, {state_dict[k].shape} => {state_dict_3d[k].shape}')
+            logging.info(f'Inflate: {k}, {state_dict[k].shape} => {state_dict_3d[k].shape}')
             time_dim = state_dict_3d[k].shape[2]
             state_dict[k] = inflate_weight(state_dict[k], time_dim)
     model.load_state_dict(state_dict, strict=False)
@@ -401,7 +401,7 @@ def uniformerv2_b16(
     )
 
     if pretrained:
-        logger.info('load pretrained weights')
+        logging.info('load pretrained weights')
         state_dict = torch.load(_MODELS["ViT-B/16"], map_location='cpu')
         load_state_dict(model, state_dict)
     return model.eval()
@@ -445,7 +445,7 @@ def uniformerv2_l14(
     )
 
     if pretrained:
-        logger.info('load pretrained weights')
+        logging.info('load pretrained weights')
         state_dict = torch.load(_MODELS["ViT-L/14"], map_location='cpu')
         load_state_dict(model, state_dict)
     return model.eval()
@@ -489,7 +489,7 @@ def uniformerv2_l14_336(
     )
 
     if pretrained:
-        logger.info('load pretrained weights')
+        logging.info('load pretrained weights')
         state_dict = torch.load(_MODELS["ViT-L/14_336"], map_location='cpu')
         load_state_dict(model, state_dict)
     return model.eval()
@@ -518,5 +518,5 @@ if __name__ == '__main__':
 
     flops = FlopCountAnalysis(model, torch.rand(1, 3, num_frames, 224, 224))
     s = time.time()
-    logger.info(flop_count_table(flops, max_depth=1))
-    logger.info(time.time()-s)
+    logging.info(flop_count_table(flops, max_depth=1))
+    logging.info(time.time()-s)

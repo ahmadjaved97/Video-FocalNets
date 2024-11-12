@@ -1,6 +1,7 @@
 from timm.models import create_model
 from . import videofocalnet
 from . import uniformerv2_model #change
+from . import uniformerv2       #change
 
 def build_model(config):
     model_type = config.MODEL.TYPE
@@ -44,7 +45,7 @@ def build_model(config):
             model_type,
             pretrained=is_pretrained,
             use_checkpoint=config.TRAIN.USE_CHECKPOINT,
-            checkpoint_num=config.MODEL.CHECKPOINT_NUM,
+            # checkpoint_num=config.MODEL.CHECKPOINT_NUM,
             num_classes=config.MODEL.NUM_CLASSES,
             t_size=config.DATA.NUM_FRAMES,
             

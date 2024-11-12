@@ -5,12 +5,20 @@ import torch
 import torch.nn as nn
 from timm.models.registry import register_model
 
-import uniformerv2_model as model
+from . import uniformerv2_model as model   # change
+import logging
 # from .build import MODEL_REGISTRY
 
-import slowfast.utils.logging as logging
+# import slowfast.utils.logging as logging
 
-logger = logging.get_logger(__name__)
+# logger = logging.get_logger(__name__)
+
+# Configure the logger
+
+logging.basicConfig(
+    level=logging.INFO,  # Set level (e.g., DEBUG, INFO, WARNING)
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)    #change
 
 
 class Uniformerv2(nn.Module):
@@ -93,20 +101,20 @@ class Uniformerv2(nn.Module):
 
         if self.pretrain != '':
             # Load Kineti-700 pretrained model
-            logger.info(f'load model from {self.pretrain}')
+            logging.info(f'load model from {self.pretrain}')
             state_dict = torch.load(self.pretrain, map_location='cpu')
             if self.delete_special_head and state_dict['backbone.transformer.proj.2.weight'].shape[0] != num_classes:
-                logger.info('Delete FC')
+                logging.info('Delete FC')
                 del state_dict['backbone.transformer.proj.2.weight']
                 del state_dict['backbone.transformer.proj.2.bias']
             elif not self.delete_special_head:
-                logger.info('Load FC')
+                logging.info('Load FC')
                 if num_classes == 400 or state_dict['backbone.transformer.proj.2.weight'].shape[0] == num_classes:
                     state_dict['backbone.transformer.proj.2.weight'] = state_dict['backbone.transformer.proj.2.weight'][:num_classes]
                     state_dict['backbone.transformer.proj.2.bias'] = state_dict['backbone.transformer.proj.2.bias'][:num_classes]
                 else:
                     map_path = f'./data_list/k710/label_mixto{num_classes}.json'
-                    logger.info(f'Load label map from {map_path}')
+                    logging.info(f'Load label map from {map_path}')
                     with open(map_path) as f:
                         label_map = json.load(f)
                     state_dict['backbone.transformer.proj.2.weight'] = state_dict['backbone.transformer.proj.2.weight'][label_map]
@@ -118,7 +126,7 @@ class Uniformerv2(nn.Module):
                 # Backbone
                 'conv1', 'class_embedding', 'positional_embedding', 'ln_pre', 'transformer.resblocks'
             ]
-            logger.info(f'Freeze List: {backbone_list}')
+            logging.info(f'Freeze List: {backbone_list}')
             for name, p in self.backbone.named_parameters():
                 flag = False
                 for module in backbone_list:
@@ -126,10 +134,10 @@ class Uniformerv2(nn.Module):
                         flag = True
                         break
                 if flag:
-                    logger.info(f'Frozen {name}')
+                    logging.info(f'Frozen {name}')
                     p.requires_grad = False
                 else:
-                    logger.info(f'FT {name}')
+                    logging.info(f'FT {name}')
 
     def forward(self, x):
         x = x[0]
@@ -177,7 +185,7 @@ def uniformerv2(
     )
 
     if pretrained and pretrain:
-        logger.info(f"Loading pretrained weights from {pretrain}")
+        logging.info(f"Loading pretrained weights from {pretrain}")
         state_dict = torch.load(pretrain, map_location="cpu")
         model.load_state_dict(state_dict, strict=False)
     
